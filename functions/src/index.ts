@@ -1,5 +1,8 @@
+import { format } from 'date-fns'
 import * as admin from 'firebase-admin'
 import * as functions from 'firebase-functions'
+
+import { Contact } from './models/contact.model'
 
 let nodemailer = require('nodemailer')
 let serviceAccount = require('../serviceAccountKey.json')
@@ -48,15 +51,28 @@ const createContactTriggerFromFirestore = functions
   .region('asia-northeast1')
   .firestore.document('contacts/{contactId}')
   .onCreate(async (snapshot, context) => {
-    const contactContent = snapshot.data().contactContent
-    const contactTitle = snapshot.data().contactTitle
-    let message = `タイトル：${contactTitle}\n`
-    message += `問い合わせ内容：${contactContent}`
+    const timestamp = snapshot.data().createdAt.seconds
+    const date = new Date(parseInt(timestamp, 10) * 1000)
+    const contact: Contact = {
+      contactId: snapshot.id,
+      contactTitle: snapshot.data().contactTitle,
+      contactContent: snapshot.data().contactContent,
+      contactFrom: snapshot.data().contactFrom,
+      createdAt: date,
+    }
+    let message = 'このメールは自動送信です。\n'
+    message += '下記の内容のお問い合わせがありました。\n\n'
+    message += '～～～～～～～～～～～～～～～～～～～～～～～～～～\n'
+    message += `タイトル　　　　：${contact.contactTitle}\n`
+    message += `問い合わせ内容　：${contact.contactContent}\n`
+    message += `ユーザ名　　　　：${contact.contactFrom.username}\n`
+    message += `日時　　　　　　：${format(contact.createdAt, 'yyyy-MM-dd')}\n`
+    message += '～～～～～～～～～～～～～～～～～～～～～～～～～～\n'
     try {
       const mailOptions = {
         from: 'yaeok.engineer@gmail.com',
         to: 'yaeok.engineer@gmail.com',
-        subject: '資格アプリからお問合せがありました',
+        subject: '資格アプリに問い合わせがありました',
         text: message,
       }
 
