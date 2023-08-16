@@ -37,10 +37,10 @@ const registerUserTriggerFromAuth = functions
 
 /** Gmail送信用の設定変数 */
 let transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: 'Gmail',
   auth: {
-    user: 'yaeok.engineer@gmail',
-    pass: 'Yaeo0822',
+    user: 'yaeok.engineer@gmail.com',
+    pass: 'xyfbeflnxvilpupe',
   },
 })
 /** firestoreのcontactsに新規作成されたときに動作する処理 */
@@ -48,15 +48,19 @@ const createContactTriggerFromFirestore = functions
   .region('asia-northeast1')
   .firestore.document('contacts/{contactId}')
   .onCreate(async (snapshot, context) => {
+    const contactContent = snapshot.data().contactContent
+    const contactTitle = snapshot.data().contactTitle
+    let message = `タイトル：${contactTitle}\n`
+    message += `問い合わせ内容：${contactContent}`
     try {
       const mailOptions = {
         from: 'yaeok.engineer@gmail.com',
-        to: 'k.yaeo@carep-tech.com',
-        subject: 'cloud functionsからのメール',
-        html: 'これはサンプルのメールです',
+        to: 'yaeok.engineer@gmail.com',
+        subject: '資格アプリからお問合せがありました',
+        text: message,
       }
 
-      return transporter.sendMail(mailOptions, (error, info) => {
+      await transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           return logColRef.add({
             status: 'error',
@@ -71,7 +75,11 @@ const createContactTriggerFromFirestore = functions
         })
       })
     } catch (error) {
-      console.error(error)
+      logColRef.add({
+        status: 'error',
+        message: error,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      })
       return
     }
   })
