@@ -63,10 +63,13 @@ const createContactTriggerFromFirestore = functions
     let message = 'このメールは自動送信です。\n'
     message += '下記の内容のお問い合わせがありました。\n\n'
     message += '～～～～～～～～～～～～～～～～～～～～～～～～～～\n'
-    message += `タイトル　　　　：${contact.contactTitle}\n`
-    message += `問い合わせ内容　：${contact.contactContent}\n`
-    message += `ユーザ名　　　　：${contact.contactFrom.username}\n`
-    message += `日時　　　　　　：${format(contact.createdAt, 'yyyy-MM-dd')}\n`
+    message += `タイトル　　　　：\n　${contact.contactTitle}\n`
+    message += `問い合わせ内容　：\n　${contact.contactContent}\n`
+    message += `ユーザ名　　　　：\n　${contact.contactFrom.username}\n`
+    message += `日時　　　　　　：\n　${format(
+      contact.createdAt,
+      'yyyy-MM-dd'
+    )}\n`
     message += '～～～～～～～～～～～～～～～～～～～～～～～～～～\n'
     try {
       const mailOptions = {
