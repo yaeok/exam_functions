@@ -125,6 +125,7 @@ const sendAnswerResultByEmailBatch = functions
         .collection('users')
         .doc(user.uid)
         .collection('results')
+        .where('permSendEmail', '==', true)
         .where(
           'executedAt',
           '>=',
@@ -153,30 +154,26 @@ const sendAnswerResultByEmailBatch = functions
       message += '正解率：' + Math.round((numberOfCorrect / 10) * 100) + '%\n'
 
       try {
-        if (user.permSendEmail === false) {
-          continue
-        } else {
-          const mailOptions = {
-            from: user.email,
-            to: 'yaeok.engineer@gmail.com',
-            subject: '【定期送信】今週の成績',
-            text: message,
-          }
-          await transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-              return logColRef.add({
-                status: 'error',
-                message: error,
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
-              })
-            }
+        const mailOptions = {
+          from: user.email,
+          to: 'yaeok.engineer@gmail.com',
+          subject: '【定期送信】今週の成績',
+          text: message,
+        }
+        await transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
             return logColRef.add({
-              status: 'success',
-              message: 'メールが正常に送信されました',
+              status: 'error',
+              message: error,
               createdAt: admin.firestore.FieldValue.serverTimestamp(),
             })
+          }
+          return logColRef.add({
+            status: 'success',
+            message: 'メールが正常に送信されました',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
           })
-        }
+        })
       } catch (error) {
         logColRef.add({
           status: 'error',
