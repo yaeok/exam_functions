@@ -1,9 +1,9 @@
-import { format } from 'date-fns'
-import * as admin from 'firebase-admin'
-import * as functions from 'firebase-functions'
+import { format } from 'date-fns';
+import * as admin from 'firebase-admin';
+import * as functions from 'firebase-functions';
 
-import { Contact } from './models/contacts.model'
-import { User } from './models/users.model'
+import { Contact } from './models/contacts.model';
+import { User } from './models/users.model';
 
 let nodemailer = require('nodemailer')
 let serviceAccount = require('../serviceAccountKey.json')
@@ -66,13 +66,13 @@ const createContactTriggerFromFirestore = functions
     let message = 'このメールは自動送信です。\n'
     message += '下記の内容のお問い合わせがありました。\n\n'
     message += '～～～～～～～～～～～～～～～～～～～～～～～～～～\n'
-    message += `タイトル　　　　：\n　${contact.contactTitle}\n`
-    message += `問い合わせ内容　：\n　${contact.contactContent}\n`
-    message += `ユーザ名　　　　：\n　${contact.contactFrom.username}\n`
-    message += `日時　　　　　　：\n　${format(
+    message += `タイトル　　　　：　${contact.contactTitle}\n`
+    message += `ユーザ名　　　　：　${contact.contactFrom.username}\n`
+    message += `日時　　　　　　：　${format(
       contact.createdAt,
-      'yyyy-MM-dd'
+      'yyyy年MM月dd日'
     )}\n`
+    message += `問い合わせ内容　：\n　${contact.contactContent}\n`
     message += '～～～～～～～～～～～～～～～～～～～～～～～～～～\n'
     try {
       const mailOptions = {
