@@ -111,7 +111,11 @@ const sendAnswerResultByEmailBatch = functions
   .region('asia-northeast1')
   .pubsub.schedule('0 8 * * 6')
   .onRun(async (context) => {
-    const users = await admin.firestore().collection('users').get()
+    const users = await admin
+      .firestore()
+      .collection('users')
+      .where('permSendEmail', '==', true)
+      .get()
     const userList: User[] = users.docs.map((doc) => {
       return {
         uid: doc.data().uid,
@@ -121,14 +125,13 @@ const sendAnswerResultByEmailBatch = functions
     })
     for (const user of userList) {
       let date = new Date(new Date().setDate(new Date().getDate() - 7))
-      let timestamp = Math.floor(date.getTime() / 1000)
+      // let timestamp = Math.floor(date.getTime() / 1000)
       const results = await admin
         .firestore()
         .collection('users')
         .doc(user.uid)
         .collection('results')
-        .where('permSendEmail', '==', true)
-        .where('executedAt', '>=', timestamp)
+        .where('executedAt', '>=', date)
         .get()
       const result = results.docs.map((doc) => {
         return {
@@ -148,7 +151,12 @@ const sendAnswerResultByEmailBatch = functions
       message += '問題回答数：' + (numberOfCorrect + numberOfInCorrect) + '\n'
       message += '正解数：' + numberOfCorrect + '\n'
       message += '誤答数：' + numberOfInCorrect + '\n'
-      message += '正解率：' + Math.round((numberOfCorrect / 10) * 100) + '%\n'
+      message +=
+        '正解率：' +
+        Math.round(
+          (numberOfCorrect / (numberOfCorrect + numberOfInCorrect)) * 100
+        ) +
+        '%\n'
       message += '\n試験に向けて、来週も頑張りましょう！\n'
 
       try {
