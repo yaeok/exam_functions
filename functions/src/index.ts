@@ -1,9 +1,9 @@
-import { format } from 'date-fns';
-import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
+import { format } from 'date-fns'
+import * as admin from 'firebase-admin'
+import * as functions from 'firebase-functions'
 
-import { Contact } from './models/contacts.model';
-import { User } from './models/users.model';
+import { Contact } from './models/contacts.model'
+import { User } from './models/users.model'
 
 let nodemailer = require('nodemailer')
 let serviceAccount = require('../serviceAccountKey.json')
@@ -144,12 +144,12 @@ const sendAnswerResultByEmailBatch = functions
         return acc + cur.numberOfInCorrect
       }, 0)
       let message = 'このメールは自動送信です。\n'
-      message += '下記の内容の今週の成績が送信されました。\n\n'
-      message += '今週の成績\n'
+      message += '今週の成績です。\n\n'
       message += '問題回答数：' + (numberOfCorrect + numberOfInCorrect) + '\n'
       message += '正解数：' + numberOfCorrect + '\n'
       message += '誤答数：' + numberOfInCorrect + '\n'
       message += '正解率：' + Math.round((numberOfCorrect / 10) * 100) + '%\n'
+      message += '\n試験に向けて、来週も頑張りましょう！\n'
 
       try {
         const mailOptions = {
