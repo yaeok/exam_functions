@@ -120,17 +120,15 @@ const sendAnswerResultByEmailBatch = functions
       } as User
     })
     for (const user of userList) {
+      let date = new Date(new Date().setDate(new Date().getDate() - 7))
+      let timestamp = Math.floor(date.getTime() / 1000)
       const results = await admin
         .firestore()
         .collection('users')
         .doc(user.uid)
         .collection('results')
         .where('permSendEmail', '==', true)
-        .where(
-          'executedAt',
-          '>=',
-          new Date(new Date().setDate(new Date().getDate() - 7))
-        )
+        .where('executedAt', '>=', timestamp)
         .get()
       const result = results.docs.map((doc) => {
         return {
